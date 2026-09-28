@@ -31,9 +31,64 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  test:
+    name: Smoke test image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.4.1
+
+      - name: Build test image
+        uses: docker/build-push-action@v7.4.0
+        with:
+          context: .
+          load: true
+          tags: autoingest:smoke
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start test container
+        run: |
+          docker run --detach \
+            --name autoingest-smoke \
+            --publish 127.0.0.1:18080:8080 \
+            --env REQUIRE_RECORDINGS_MOUNT=false \
+            --env TZ=UTC \
+            --tmpfs /data:rw,uid=10001,gid=10001,mode=0750 \
+            --tmpfs /spool:rw,uid=10001,gid=10001,mode=0750 \
+            --tmpfs /recordings:rw,uid=10001,gid=10001,mode=0750 \
+            autoingest:smoke
+
+      - name: Verify health endpoint
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error http://127.0.0.1:18080/healthz; then
+              exit 0
+            fi
+
+            if [ "$(docker inspect --format '{{.State.Running}}' autoingest-smoke)" != "true" ]; then
+              docker logs autoingest-smoke
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          docker logs autoingest-smoke
+          exit 1
+
+      - name: Remove test container
+        if: always()
+        run: docker rm --force autoingest-smoke || true
+
   publish:
     name: Build and publish
     runs-on: ubuntu-latest
+    needs: test
 
     steps:
       - name: Check out source

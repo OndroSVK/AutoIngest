@@ -85,7 +85,7 @@ GitHub Actions publishes multi-architecture images for `linux/amd64` and `linux/
 - `ghcr.io/ondrosvk/autoingest:latest` changes only when a GitHub Release is published or when the workflow is manually dispatched for the `latest` channel.
 - A semantic release such as `v1.2.3` also publishes immutable `1.2.3` and `1.2` tags.
 
-Published images include OCI source metadata, an SBOM, and provenance attestations. The registry package must be set to public once after its first publication if anonymous `docker pull` access is required.
+Before publication, the workflow starts the built image as the production non-root user and requires its `/healthz` endpoint to pass. Published images include OCI source metadata, an SBOM, and provenance attestations. The registry package must be set to public once after its first publication if anonymous `docker pull` access is required.
 
 For local image development only:
 
