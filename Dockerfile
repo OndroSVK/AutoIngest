@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+LABEL org.opencontainers.image.title="AutoIngest" \
+    org.opencontainers.image.description="Dockerized ingest recorder for newsroom and broadcast workflows" \
+    org.opencontainers.image.source="https://github.com/OndroSVK/AutoIngest"
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1

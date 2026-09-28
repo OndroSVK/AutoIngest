@@ -1,6 +1,6 @@
 services:
   ingest-recorder:
-    build: .
+    image: "${AUTOINGEST_IMAGE:-ghcr.io/ondrosvk/autoingest:latest}"
     container_name: ingest-recorder
     restart: unless-stopped
     ports:

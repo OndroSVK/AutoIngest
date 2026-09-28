@@ -33,7 +33,27 @@ By default `REQUIRE_RECORDINGS_MOUNT=true`. If `/recordings` is not a mount poin
 
 ```bash
 cp .env.example .env
-docker compose up --build -d
+docker compose pull
+docker compose up -d
+```
+
+The default Compose configuration uses the prebuilt stable image:
+
+```text
+ghcr.io/ondrosvk/autoingest:latest
+```
+
+No local image build is required. To update later:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+To test the development channel, set this in `.env` before running Compose:
+
+```text
+AUTOINGEST_IMAGE=ghcr.io/ondrosvk/autoingest:dev
 ```
 
 Open:
@@ -51,10 +71,28 @@ docker network create restreamer_default
 Then start with the optional override:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.restreamer.yml up --build -d
+docker compose -f docker-compose.yml -f docker-compose.restreamer.yml pull
+docker compose -f docker-compose.yml -f docker-compose.restreamer.yml up -d
 ```
 
 Set `RESTREAMER_NETWORK` in `.env` if the external Docker network has a different name.
+
+## Container Release Channels
+
+GitHub Actions publishes multi-architecture images for `linux/amd64` and `linux/arm64` to GitHub Container Registry.
+
+- `ghcr.io/ondrosvk/autoingest:dev` follows every successful build from `main`.
+- `ghcr.io/ondrosvk/autoingest:latest` changes only when a GitHub Release is published or when the workflow is manually dispatched for the `latest` channel.
+- A semantic release such as `v1.2.3` also publishes immutable `1.2.3` and `1.2` tags.
+
+Published images include OCI source metadata, an SBOM, and provenance attestations. The registry package must be set to public once after its first publication if anonymous `docker pull` access is required.
+
+For local image development only:
+
+```bash
+docker build -t autoingest:local .
+AUTOINGEST_IMAGE=autoingest:local docker compose up -d
+```
 
 ## Channel URLs
 
