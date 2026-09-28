@@ -4,6 +4,7 @@ import asyncio
 import logging
 import os
 import shutil
+import time
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -92,7 +93,7 @@ class StorageManager:
     async def archive_once(self, channels: list[dict], recorder_manager) -> None:
         if not self.archive_available():
             return
-        now = asyncio.get_running_loop().time()
+        now = time.time()
         for channel in channels:
             spool_dir = self.channel_spool_dir(channel)
             files = sorted(spool_dir.glob("*.mkv"), key=lambda p: p.stat().st_mtime)
