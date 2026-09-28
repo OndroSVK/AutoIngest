@@ -1,0 +1,1 @@
+"""Ingest recorder application package."""

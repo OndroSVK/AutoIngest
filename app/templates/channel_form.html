@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ "Edit" if channel else "Add" }} channel</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>{{ "Edit" if channel else "Add" }} channel</h1>
+    <nav><a class="button" href="/">Dashboard</a></nav>
+  </header>
+  <main class="narrow">
+    {% if error %}<p class="alert">{{ error }}</p>{% endif %}
+    <form class="edit-form" method="post" action="{{ '/channels/' ~ channel.id if channel else '/channels' }}">
+      <label>Name <input name="display_name" required maxlength="64" value="{{ channel.display_name if channel else '' }}"></label>
+      <label>Input URL <input name="input_url" required value="{{ channel.input_url if channel else '' }}"></label>
+      <label>Output subfolder <input name="output_folder" value="{{ channel.output_folder if channel else '' }}"></label>
+      <label>Segment duration <input type="number" min="30" max="86400" name="segment_duration" value="{{ channel.segment_duration if channel else 300 }}"></label>
+      <label class="check"><input type="checkbox" name="enabled" value="true" {% if channel and channel.enabled %}checked{% endif %}> Enabled</label>
+      <label class="check"><input type="checkbox" name="automatic_recording" value="true" {% if not channel or channel.automatic_recording %}checked{% endif %}> Automatic recording</label>
+      <div class="form-actions">
+        <button class="primary">Save</button>
+        <a class="button" href="/">Cancel</a>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

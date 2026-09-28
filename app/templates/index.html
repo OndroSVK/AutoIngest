@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ingest Recorder</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Ingest Recorder</h1>
+    <nav>
+      <a class="button primary" href="/channels/new">Add channel</a>
+      <a class="button" href="/docs">API docs</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="status-grid">
+      <div>
+        <h2>Spool</h2>
+        <dl>
+          <dt>Path</dt><dd>{{ spool.path }}</dd>
+          <dt>Writable</dt><dd>{{ "yes" if spool.writable else "no" }}</dd>
+          <dt>Free</dt><dd>{{ (spool.free_bytes / 1073741824) | round(1) }} GB</dd>
+        </dl>
+      </div>
+      <div>
+        <h2>NAS archive</h2>
+        <dl>
+          <dt>Status</dt><dd class="{{ 'ok' if recordings.available else 'bad' }}">{{ "available" if recordings.available else "unavailable" }}</dd>
+          <dt>Mounted</dt><dd>{{ "yes" if recordings.mounted else "no" }}</dd>
+          <dt>Filesystem</dt><dd>{{ recordings.filesystem or "unknown" }}</dd>
+          <dt>Writable</dt><dd>{{ "yes" if recordings.writable else "no" }}</dd>
+          <dt>Free</dt><dd>{{ (recordings.free_bytes / 1073741824) | round(1) }} GB</dd>
+          {% if recordings.error %}<dt>Error</dt><dd>{{ recordings.error }}</dd>{% endif %}
+        </dl>
+      </div>
+      <div>
+        <h2>Queue</h2>
+        <dl>
+          <dt>Files</dt><dd>{{ queue.count }}</dd>
+          <dt>Total</dt><dd>{{ (queue.bytes / 1048576) | round(1) }} MB</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section>
+      <h2>Channels</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Enabled</th>
+              <th>Status</th>
+              <th>PID</th>
+              <th>Input / codec</th>
+              <th>Bitrate</th>
+              <th>Current file</th>
+              <th>Last error</th>
+              <th>Spool</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for channel in channels %}
+            <tr>
+              <td>
+                <strong>{{ channel.display_name }}</strong>
+                <small>{{ channel.redacted_input_url }}</small>
+              </td>
+              <td>{{ "yes" if channel.enabled else "no" }}</td>
+              <td><span class="pill state-{{ channel.runtime.state | lower }}">{{ channel.runtime.state }}</span></td>
+              <td>{{ channel.runtime.pid or "" }}</td>
+              <td>{{ channel.runtime.input_info }}</td>
+              <td>{{ channel.runtime.bitrate }}</td>
+              <td>{{ channel.runtime.current_file }}</td>
+              <td class="error">{{ channel.runtime.last_error }}</td>
+              <td>{{ channel.spool_count }}</td>
+              <td class="actions">
+                <a class="button" href="/channels/{{ channel.id }}/edit">Edit</a>
+                <form method="post" action="/channels/{{ channel.id }}/toggle"><button>{{ "Disable" if channel.enabled else "Enable" }}</button></form>
+                <form method="post" action="/channels/{{ channel.id }}/restart"><button>Restart</button></form>
+                <form method="post" action="/channels/{{ channel.id }}/delete" data-confirm="Delete channel?"><button class="danger">Delete</button></form>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="10" class="empty">No channels configured yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

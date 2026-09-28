@@ -1,0 +1,9 @@
+services:
+  ingest-recorder:
+    networks:
+      - restreamer
+
+networks:
+  restreamer:
+    external: true
+    name: "${RESTREAMER_NETWORK:-restreamer_default}"

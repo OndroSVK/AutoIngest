@@ -1,0 +1,26 @@
+services:
+  ingest-recorder:
+    build: .
+    container_name: ingest-recorder
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      TZ: "${TZ:-Europe/Bratislava}"
+      DATA_DIR: /data
+      SPOOL_DIR: /spool
+      RECORDINGS_DIR: /recordings
+      REQUIRE_RECORDINGS_MOUNT: "${REQUIRE_RECORDINGS_MOUNT:-true}"
+      RECORDINGS_EXPECTED_FSTYPE: "${RECORDINGS_EXPECTED_FSTYPE:-}"
+      RECORDER_RETRY_SECONDS: "${RECORDER_RETRY_SECONDS:-10}"
+      ARCHIVE_INTERVAL_SECONDS: "${ARCHIVE_INTERVAL_SECONDS:-10}"
+    volumes:
+      - "${DATA_PATH:-./data}:/data"
+      - "${SPOOL_PATH:-./spool}:/spool"
+      - "${RECORDINGS_PATH:-/mnt/ingest}:/recordings"
+    networks:
+      - ingest
+
+networks:
+  ingest:
+    driver: bridge
